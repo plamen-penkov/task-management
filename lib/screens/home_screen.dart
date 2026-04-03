@@ -4,8 +4,24 @@ import '../models/task.dart';
 import '../providers/task_provider.dart';
 import 'detail_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final _titleController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,28 +122,27 @@ class HomeScreen extends StatelessWidget {
               },
             ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddTaskDialog(context),
+        onPressed: () => _showAddTaskDialog(),
         child: const Icon(Icons.add),
       ),
     );
   }
 
-  void _showAddTaskDialog(BuildContext context) {
-    final titleController = TextEditingController();
-    final descriptionController = TextEditingController();
-    final formKey = GlobalKey<FormState>();
+  void _showAddTaskDialog() {
+    _titleController.clear();
+    _descriptionController.clear();
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Add Task'),
         content: Form(
-          key: formKey,
+          key: _formKey,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextFormField(
-                controller: titleController,
+                controller: _titleController,
                 decoration: const InputDecoration(labelText: 'Title'),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
@@ -138,7 +153,7 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               TextFormField(
-                controller: descriptionController,
+                controller: _descriptionController,
                 decoration: const InputDecoration(labelText: 'Description'),
                 maxLines: 3,
               ),
@@ -152,11 +167,11 @@ class HomeScreen extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () {
-              if (formKey.currentState!.validate()) {
+              if (_formKey.currentState!.validate()) {
                 final newTask = Task(
                   id: DateTime.now().millisecondsSinceEpoch.toString(),
-                  title: titleController.text.trim(),
-                  description: descriptionController.text.trim(),
+                  title: _titleController.text.trim(),
+                  description: _descriptionController.text.trim(),
                 );
                 Provider.of<TaskProvider>(context, listen: false)
                     .addTask(newTask);
